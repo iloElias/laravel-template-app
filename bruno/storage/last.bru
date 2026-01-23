@@ -1,0 +1,20 @@
+meta {
+  name: last
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{base-url}}/storage/last
+  body: multipartForm
+  auth: none
+}
+
+headers {
+  Content-Type: multipart/form-data
+  User-Agent: insomnia/10.3.0
+}
+
+body:multipart-form {
+  undefined: undefined
+}

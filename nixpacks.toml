@@ -1,0 +1,5 @@
+[project]
+type = "php"
+
+[commands]
+run = "./ci.sh"

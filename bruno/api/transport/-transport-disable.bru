@@ -1,0 +1,23 @@
+meta {
+  name: /transport/disable
+  type: http
+  seq: 4
+}
+
+delete {
+  url: {{base-url}}/transport/disable
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+  User-Agent: insomnia/10.0.0
+  Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MiwibmFtZSI6IkViZXIgRmlndWVpcmVkbyIsIm51bWJlciI6IjU1NjQxMjM0MTIzNCIsInNlc3Npb25faWQiOjIsInNlc3Npb25fdHMiOiIyMDI0LTEwLTE0IDAzOjM0OjE3Ljg5NTIxIn0.fppRPIQrpDl5XJnzWxQSPxhI5sELCJaDc8mWNOeUda0
+}
+
+body:json {
+  {
+  	"id": 1
+  }
+}

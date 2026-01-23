@@ -1,0 +1,128 @@
+{
+  "format": "<type>(<scope>): <subject>",
+  "types": [
+    "feat",
+    "fix",
+    "docs",
+    "style",
+    "refactor",
+    "perf",
+    "test",
+    "chore",
+    "ci",
+    "build",
+    "revert"
+  ],
+  "typeDescriptions": {
+    "feat": "A new feature",
+    "fix": "A bug fix",
+    "docs": "Documentation only changes",
+    "style": "Code style changes (formatting, whitespace, missing semicolons, etc.) that do not affect code meaning",
+    "refactor": "Code changes that neither fix bugs nor add features (code restructuring, improving readability)",
+    "perf": "Performance improvements",
+    "test": "Adding or updating tests",
+    "chore": "Maintenance tasks, dependency updates, build configuration changes",
+    "ci": "Continuous integration or pipeline changes",
+    "build": "Build system or external dependencies changes",
+    "revert": "Reverts a previous commit"
+  },
+  "scope": {
+    "required": false,
+    "format": "lowercase with hyphens",
+    "commonScopes": ["auth", "ui", "api", "form", "layout", "config", "deps", "types", "utils"],
+    "guidelines": [
+      "Use lowercase",
+      "Use hyphens to separate words",
+      "Omit if change affects multiple areas or is too broad"
+    ]
+  },
+  "subject": {
+    "mood": "imperative",
+    "tense": "present",
+    "language": "English",
+    "case": "lowercase",
+    "maxLength": 72,
+    "minLength": 10,
+    "endWithPeriod": false,
+    "description": "what the commit does, not why or how",
+    "examples": {
+      "good": [
+        "feat(auth): add user login flow",
+        "fix(ui): resolve crash on mobile devices",
+        "chore(deps): update React to v18"
+      ],
+      "bad": [
+        "feat: Added new feature",
+        "fix bug",
+        "FEAT(AUTH): ADD LOGIN",
+        "feat(auth): add user login flow."
+      ]
+    }
+  },
+  "body": {
+    "required": false,
+    "guidelines": [
+      "Separated from subject by blank line",
+      "Explain the 'why' and 'how', not the 'what'",
+      "Wrap at 72 characters per line",
+      "May use bullet points for multiple changes"
+    ]
+  },
+  "footer": {
+    "required": false,
+    "allowedFormats": [
+      "Closes #<issue-number>",
+      "Fixes #<issue-number>",
+      "Refs #<issue-number>",
+      "BREAKING CHANGE: <description>",
+      "Co-authored-by: <name> <email>"
+    ]
+  },
+  "rules": [
+    "Always use the format: <type>(<scope>): <subject>",
+    "Type is required and must be one of the listed types",
+    "Scope is optional but recommended when the change is localized",
+    "Subject must be imperative mood, present tense, lowercase",
+    "Subject should be concise (50-72 characters)",
+    "Use English for all commit messages",
+    "No period at the end of the subject",
+    "Body and footer are optional but useful for complex changes",
+    "Reference issues in the footer, not the subject",
+    "Be descriptive but concise - focus on what changed"
+  ],
+  "contextAwareRules": [
+    "Analyze the diff to determine the appropriate type and scope",
+    "Group related changes - if multiple files change for one feature, use one commit",
+    "Be specific - 'fix button alignment' is better than 'fix bug'",
+    "Match the branch type - if branch is 'feature/login', commit should be 'feat'",
+    "Consider the impact - breaking changes must be marked in the footer",
+    "Use technical terms correctly - match the terminology used in the codebase"
+  ],
+  "examples": {
+    "newFeature": "feat(form): add date picker component",
+    "bugFix": "fix(ui): resolve button alignment issue on mobile",
+    "documentation": "docs(readme): update installation instructions",
+    "refactoring": "refactor(api): extract authentication logic into separate module",
+    "performance": "perf(api): optimize database query for user lookup",
+    "test": "test(auth): add unit tests for login flow",
+    "chore": "chore(deps): update Next.js to 16.0.3",
+    "breakingChange": {
+      "subject": "feat(api): change authentication endpoint structure",
+      "body": "BREAKING CHANGE: The /auth/login endpoint now requires email instead of username.\nUpdate all API clients to use the new field name."
+    }
+  },
+  "validation": {
+    "checks": [
+      "Type is one of the allowed types",
+      "Format follows <type>(<scope>): <subject>",
+      "Subject is in imperative mood, present tense",
+      "Subject is lowercase (except proper nouns)",
+      "Subject does not end with a period",
+      "Subject is concise (under 72 characters)",
+      "Message is in English",
+      "Scope is appropriate or omitted",
+      "Body explains 'why' if provided",
+      "Breaking changes are marked in footer if applicable"
+    ]
+  }
+}

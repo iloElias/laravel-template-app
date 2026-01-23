@@ -1,0 +1,11 @@
+meta {
+  name: user-picture(specific)
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{base-url}}/uploads/pictures/{userUuid}/{pictureUuid}
+  body: none
+  auth: inherit
+}

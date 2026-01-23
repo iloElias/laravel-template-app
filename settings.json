@@ -1,0 +1,7 @@
+{
+    "type": "setting",
+    "settings": {
+        "php-cs-fixer.executablePath": "/path/to/php-cs-fixer",
+        "php-cs-fixer.onsave": true
+    }
+}

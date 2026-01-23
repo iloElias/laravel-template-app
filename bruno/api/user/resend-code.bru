@@ -1,0 +1,20 @@
+meta {
+  name: resend-code
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{base-url}}{{base-api-route}}/user/resend-code
+  body: none
+  auth: none
+}
+
+params:query {
+  ~undefined: undefined
+}
+
+headers {
+  User-Agent: insomnia/10.0.0
+  Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MiwibmFtZSI6IkViZXIgRmlndWVpcmVkbyIsIm51bWJlciI6IjU1NjQxMjM0MTIzNCIsImNyZWF0ZWRfaW4iOiIyMDI0LTEwLTE0IDAzOjMzOjQ1LjAxOTg2OCJ9.xg-jvh3t_efOxeuTYuHKpGrWFU6JQ4Gum63t5CZoCxE
+}

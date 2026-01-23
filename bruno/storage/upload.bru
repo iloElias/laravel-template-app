@@ -1,0 +1,20 @@
+meta {
+  name: upload
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{base-url}}/storage/upload/
+  body: multipartForm
+  auth: none
+}
+
+headers {
+  Content-Type: multipart/form-data
+  User-Agent: insomnia/10.3.0
+}
+
+body:multipart-form {
+  image: undefined
+}

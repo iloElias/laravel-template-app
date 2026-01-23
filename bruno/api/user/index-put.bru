@@ -1,0 +1,32 @@
+meta {
+  name: index
+  type: http
+  seq: 3
+}
+
+put {
+  url: {{base-url}}{{base-api-route}}/user
+  body: json
+  auth: none
+}
+
+params:query {
+  ~id: 1
+  ~undefined: undefined
+}
+
+headers {
+  Content-Type: application/json
+  User-Agent: insomnia/10.0.0
+  undefined: undefined
+}
+
+body:json {
+  {
+  	"name": "Murilo Elias",
+  	"surname": "Santos Figueiredo",
+  	"documents": [{
+
+  	}]
+  }
+}

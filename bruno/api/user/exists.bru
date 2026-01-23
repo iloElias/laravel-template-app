@@ -1,0 +1,19 @@
+meta {
+  name: exists
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{base-url}}{{base-api-route}}/user/exists
+  body: none
+  auth: none
+}
+
+params:query {
+  number: 5564996020731
+}
+
+headers {
+  User-Agent: insomnia/10.0.0
+}

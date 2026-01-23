@@ -1,0 +1,15 @@
+meta {
+  name: validate
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{base-url}}{{base-api-route}}/fingerprint
+  body: none
+  auth: none
+}
+
+headers {
+  User-Agent: insomnia/10.0.0
+}

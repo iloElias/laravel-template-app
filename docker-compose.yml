@@ -1,0 +1,28 @@
+services:
+  template-nginx:
+    container_name: template-nginx
+    image: nginx:alpine
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/config/nginx/conf.d/api.conf:/etc/nginx/conf.d/api.conf
+      - ./docker/config/nginx/conf.d/console.conf:/etc/nginx/conf.d/console.conf
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - default-network
+
+  template-php:
+    container_name: template-php
+    extends:
+      file: ../docker-compose.yml
+      service: template-php
+
+volumes:
+  nginx-data:
+
+networks:
+  default-network:
+    driver: bridge

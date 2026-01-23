@@ -1,0 +1,31 @@
+meta {
+  name: index
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{base-url}}{{base-api-route}}/user
+  body: json
+  auth: none
+}
+
+params:query {
+  ~id: 1
+  ~undefined: undefined
+}
+
+headers {
+  Content-Type: application/json
+  User-Agent: insomnia/10.0.0
+}
+
+body:json {
+  {
+  	"name": "Murilo Elias",
+  	"surname": "Santos Figueiredo",
+  	"number": "mu",
+  	"password": "ABcd1234",
+  	"password_confirm": "ABcd1234"
+  }
+}
