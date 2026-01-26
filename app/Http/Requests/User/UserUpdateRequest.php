@@ -15,9 +15,17 @@ class UserUpdateRequest extends FormRequest
     {
         return [
             'name' => 'required|string|min:1|max:255',
-            'surname' => 'required|string|min:1|max:255',
+            'surname' => 'nullable|string|min:1|max:255',
             'language' => 'nullable|string|max:10',
             'pix_key' => 'nullable|string|max:255',
         ];
+    }
+
+    protected function passedValidation(): void
+    {
+        $this->replace([
+            'name' => ucwords(strtolower($this->input('name'))),
+            'surname' => ucwords(strtolower($this->input('surname'))),
+        ]);
     }
 }

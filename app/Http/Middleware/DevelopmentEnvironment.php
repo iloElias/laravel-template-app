@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Utils;
 use Illuminate\Http\Request;
 
 class DevelopmentEnvironment
@@ -15,7 +16,7 @@ class DevelopmentEnvironment
      */
     public function handle($request, \Closure $next)
     {
-        if (env('APP_ENV') !== 'local' || env('ENVIRONMENT') !== 'development') {
+        if (Utils::isProduction()) {
             return response()->json(['message' => 'Not allowed environment'], 404);
         }
 

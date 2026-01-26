@@ -15,7 +15,7 @@ class TokenFactory
                 'iss' => env('APP_URL'),
                 'sub' => $user->id,
                 'sid' => $session->id,
-                'aud' => 'agrofast-app-services',
+                'aud' => env('APP_NAME') . '-services',
                 'iat' => now()->timestamp,
                 'jti' => uniqid(),
             ],

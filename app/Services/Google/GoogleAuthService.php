@@ -5,7 +5,7 @@ namespace App\Services\Google;
 use App\Exception\InvalidRequestException;
 use App\Factories\SessionFactory;
 use App\Factories\TokenFactory;
-use App\Models\Hr\BrowserAgent;
+use App\Models\Hr\DeviceAgent;
 use App\Models\Hr\Session;
 use App\Models\Hr\User;
 use App\Services\Chat\ChatService;
@@ -19,13 +19,11 @@ use Symfony\Component\HttpFoundation\Response;
 class GoogleAuthService
 {
     protected $client;
-    protected $chatService;
     protected $accessToken;
 
     public function __construct()
     {
         $this->client = new Client(['client_id' => env('GOOGLE_CLIENT_ID')]);
-        $this->chatService = new ChatService();
         $this->accessToken = new AccessToken();
     }
 
@@ -81,13 +79,9 @@ class GoogleAuthService
             'surname' => $payload['family_name'] ?? '',
             'profile_picture' => $payload['picture'] ?? null,
         ]);
-        $browserAgent = BrowserAgent::where('fingerprint', $request->header('Browser-Agent'))->first();
+        $browserAgent = DeviceAgent::where('fingerprint', $request->header('Device-Agent'))->first();
         $session = SessionFactory::create($user, $request, $browserAgent, null);
         $jwt = TokenFactory::create($user, $session);
-
-        $chat = $this->chatService->createChatWithSupport($user->id);
-        $supportUser = User::where('email', 'contact.agrofast@gmail.com')->first();
-        $this->chatService->sendMessage($chat->id, $supportUser->id, 'Olá, bem-vindo ao Terramov! Se precisar de ajuda, estamos à disposição.');
 
         return [
             'token' => $jwt,
@@ -105,7 +99,7 @@ class GoogleAuthService
      */
     public function loginFromGoogle(User $user, Request $request, $payload)
     {
-        $browserAgent = BrowserAgent::where('fingerprint', $request->header('Browser-Agent'))->first();
+        $browserAgent = DeviceAgent::where('fingerprint', $request->header('Device-Agent'))->first();
         $session = SessionFactory::create($user, $request, $browserAgent, null);
         $jwt = TokenFactory::create($user, $session);
 

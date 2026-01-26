@@ -16,10 +16,8 @@ return new class () extends Migration {
             $table->foreignId('user_id')->constrained('hr.user')->onDelete('cascade');
             $table->string('reason')->nullable();
             $table->timestamp('banned_at')->default(DB::raw('CURRENT_TIMESTAMP'));
-            $table->boolean('active')->default(true);
-            $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
-            $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP'));
-            $table->timestamp('inactivated_at')->nullable();
+            $table->timestamps();
+            $table->softDeletes();
         });
     }
 

@@ -2,7 +2,6 @@
 
 namespace App\Support\Traits;
 
-use App\Enums\UserError;
 use App\Models\Hr\Session;
 
 trait HasSession
@@ -18,14 +17,12 @@ trait HasSession
         }
         $decoded = self::getDecodedToken();
 
-        if (gettype($decoded) === 'enum') {
-            return $decoded;
+        if (!$decoded || !isset($decoded->sid)) {
+            return false;
         }
 
         $session = Session::where('id', $decoded->sid)->first();
         if (!$session) {
-            self::setLastError(UserError::SESSION_NOT_FOUND);
-
             return false;
         }
         self::$session = $session;

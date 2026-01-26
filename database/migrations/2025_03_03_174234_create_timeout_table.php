@@ -17,10 +17,8 @@ return new class () extends Migration {
             $table->string('reason')->nullable();
             $table->timestamp('timeout_start');
             $table->timestamp('timeout_end')->nullable();
-            $table->boolean('active')->default(true);
-            $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
-            $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP'));
-            $table->timestamp('inactivated_at')->nullable();
+            $table->timestamps();
+            $table->softDeletes();
         });
     }
 

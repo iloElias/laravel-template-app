@@ -2,7 +2,6 @@
 
 namespace App\Http\Middleware;
 
-use App\Enums\UserError;
 use App\Models\Hr\Session;
 use App\Models\Hr\User;
 
@@ -23,7 +22,7 @@ class UserAuth
         ])->first();
 
         if ($session->authenticated === false) {
-            return response()->json(['code' => UserError::INVALID_TOKEN], 401);
+            return response()->json('invalid token', 401);
         }
 
         return $next($request);

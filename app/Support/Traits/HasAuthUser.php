@@ -2,7 +2,6 @@
 
 namespace App\Support\Traits;
 
-use App\Enums\UserError;
 use App\Models\Hr\User;
 
 trait HasAuthUser
@@ -23,29 +22,17 @@ trait HasAuthUser
         try {
             $decoded = self::getDecodedToken();
 
-            if (gettype($decoded) === 'enum') {
-                self::setLastError($decoded);
-
+            if (!$decoded || !isset($decoded->sub)) {
                 return false;
             }
-
-            if (!isset($decoded->sub)) {
-                self::setLastError(UserError::INVALID_TOKEN);
-
-                return false;
-            }
-            $user = self::where('id', $decoded->sub)->first();
+            $user = self::whereId($decoded->sub)->first();
             if (!$user) {
-                self::setLastError(UserError::USER_NOT_FOUND);
-
                 return false;
             }
             self::$user = $user;
 
             return $user;
         } catch (\Throwable) {
-            self::setLastError(UserError::INVALID_TOKEN);
-
             return false;
         }
     }

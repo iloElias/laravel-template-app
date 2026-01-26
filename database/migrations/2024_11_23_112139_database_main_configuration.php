@@ -12,7 +12,6 @@ return new class () extends Migration {
         DB::statement("SET TIME ZONE 'America/Sao_Paulo'");
 
         DB::statement('CREATE SCHEMA IF NOT EXISTS hr');
-        DB::statement('CREATE SCHEMA IF NOT EXISTS chat');
         DB::statement('CREATE SCHEMA IF NOT EXISTS system');
         DB::statement('CREATE SCHEMA IF NOT EXISTS integration');
         DB::statement('CREATE SCHEMA IF NOT EXISTS file');
@@ -27,8 +26,6 @@ return new class () extends Migration {
         DB::statement("SET TIME ZONE 'UTC'");
 
         DB::statement('DROP SCHEMA IF EXISTS hr CASCADE');
-        DB::statement('DROP SCHEMA IF EXISTS chat CASCADE');
-        DB::statement('DROP SCHEMA IF EXISTS transport CASCADE');
         DB::statement('DROP SCHEMA IF EXISTS system CASCADE');
         DB::statement('DROP SCHEMA IF EXISTS integration CASCADE');
         DB::statement('DROP SCHEMA IF EXISTS file CASCADE');

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome to AgroFast API</title>
+    <title>Welcome to {{ env('APP_COMERCIAL_NAME') }} API</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -36,7 +36,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>Welcome to AgroFast API</h1>
+        <h1>Welcome to {{ env('APP_COMERCIAL_NAME') }} API</h1>
         <p>Your reliable API service for agricultural solutions.</p>
         <p>Start building amazing applications with our API.</p>
         <div class="version">

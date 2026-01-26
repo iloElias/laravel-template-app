@@ -20,9 +20,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property Carbon      $updated_at
  * @property null|Carbon $inactivated_at
  */
-class BrowserAgent extends Model
+class DeviceAgent extends Model
 {
-    protected $table = 'hr.browser_agent';
+    protected $table = 'hr.device_agent';
 
     protected $fillable = [
         'user_agent',
@@ -33,12 +33,6 @@ class BrowserAgent extends Model
 
     protected $casts = [
         'active' => 'boolean',
-    ];
-
-    protected $dates = [
-        'created_at',
-        'updated_at',
-        'inactivated_at',
     ];
 
     public static function validateFingerprint(string $fingerprint): ?self
@@ -62,7 +56,7 @@ class BrowserAgent extends Model
      */
     public function rememberedBrowsers(): HasMany
     {
-        return $this->hasMany(RememberBrowser::class);
+        return $this->hasMany(RememberDevice::class);
     }
 
     /**

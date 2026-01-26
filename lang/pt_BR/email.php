@@ -13,7 +13,7 @@ return [
 
     'greetings' => [
         'subject' => 'Olá, :name!',
-        'welcome' => 'Bem-vindo(a) à Agrofast!',
+        'welcome' => "Bem-vindo(a) à " . env('APP_COMERCIAL_NAME') . "!",
         'farewell' => 'Até logo, :name!',
     ],
 
@@ -43,7 +43,7 @@ return [
 
     'first_login' => [
         'subject' => 'Confirme seu primeiro acesso',
-        'title' => 'Bem-vindo à Agrofast!',
+        'title' => "Bem-vindo à " . env('APP_COMERCIAL_NAME') . "!",
         'message' => 'Obrigado por se cadastrar! Para confirmar seu primeiro acesso, utilize o código de verificação abaixo:',
         'confirm_button' => 'Confirmar Acesso',
         'expiration' => 'Este link expira em :expires.',

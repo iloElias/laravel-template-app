@@ -3,16 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Factories\BrowserAgentFactory;
-use App\Models\Hr\BrowserAgent;
+use App\Models\Hr\DeviceAgent;
 use Illuminate\Http\JsonResponse;
 
 class BrowserAgentController extends Controller
 {
     public function makeFingerprint(): JsonResponse
     {
-        $fingerprint = request()->header('Browser-Agent');
+        $fingerprint = request()->header('Device-Agent');
         if ($fingerprint) {
-            $browserAgent = BrowserAgent::validateFingerprint($fingerprint);
+            $browserAgent = DeviceAgent::validateFingerprint($fingerprint);
             if ($browserAgent) {
                 return response()->json('valid_fingerprint', 200);
             }

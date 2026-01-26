@@ -2,16 +2,11 @@
 
 namespace App\Models\Hr;
 
-use App\Models\Chat\Chat;
-use App\Models\Chat\ChatUser;
 use App\Models\DynamicQuery;
 use App\Models\LastError;
 use App\Support\Traits\HasAuthUser;
 use Carbon\Carbon;
-use Firebase\JWT\Key;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Notifications\Notifiable;
 
 /**
@@ -96,45 +91,4 @@ class User extends DynamicQuery
         'password',
         'remember_token',
     ];
-
-    public function documents(): HasMany
-    {
-        return $this->hasMany(Document::class, 'user_id', 'id');
-    }
-
-    public function payment_methods(): HasMany
-    {
-        return $this->hasMany(PaymentMethod::class, 'user_id', 'id');
-    }
-
-    public function chats(): BelongsToMany
-    {
-        $chatTable = (new Chat())->getTable();
-        $chatUserTable = (new ChatUser())->getTable();
-
-        return $this->belongsToMany(Chat::class, ChatUser::class, 'user_id', 'chat_id')
-            ->with(['users', 'last_message'])
-            ->where($chatTable . '.active', 1)
-            ->groupBy([
-                "{$chatTable}.id",
-                "{$chatUserTable}.user_id",
-                "{$chatUserTable}.chat_id",
-            ])
-            ->orderByDesc(
-                Chat::selectRaw('MAX(created_at)')
-                    ->from('chat.message')
-                    ->whereColumn('chat.message.chat_id', "{$chatTable}.id")
-            )
-        ;
-    }
-
-    public function cashOuts(): HasMany
-    {
-        return $this->hasMany(CashOut::class, 'user_id', 'id');
-    }
-
-    public function user_mercado_pago()
-    {
-        return $this->hasOne(UserMercadoPago::class, 'user_id', 'id');
-    }
 }

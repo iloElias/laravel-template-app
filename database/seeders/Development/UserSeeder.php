@@ -33,9 +33,9 @@ class UserSeeder
 
         User::create([
             'uuid' => 'f18b06cb-5c2b-4852-a765-3e6f22c59992',
-            'name' => 'Agrofast',
+            'name' => env('APP_COMERCIAL_NAME'),
             'surname' => 'Support',
-            'email' => 'contact.agrofast@gmail.com',
+            'email' => 'contact.laravel@gmail.com',
             'number' => null,
             'password' => '$2y$12$WIeQcnq4wF443lv.l9V3duATOm8EKuCiA5csHzJ82pTKNfx0hl7bq',
             'profile_type' => 'transporter',

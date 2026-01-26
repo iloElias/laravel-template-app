@@ -13,7 +13,7 @@ return [
     */
 
     'authentication' => [
-        "message" => "Seu código de autenticação para o Agrofast é: :code",
+        "message" => "Seu código de autenticação para o " . env('APP_COMERCIAL_NAME') . " é: :code",
     ],
 
 ];

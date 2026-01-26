@@ -15,7 +15,6 @@ class TrustHosts extends Middleware
     {
         return [
             $this->allSubdomainsOfApplicationUrl(),
-            // 'web.agrofast.tech',
         ];
     }
 }

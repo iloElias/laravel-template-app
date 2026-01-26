@@ -20,10 +20,8 @@ return new class () extends Migration {
             $table->boolean('authenticated')->default(false);
             $table->string('code');
             $table->unsignedInteger('attempts')->default(0);
-            $table->boolean('active')->default(true);
-            $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
-            $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP'));
-            $table->timestamp('inactivated_at')->nullable();
+            $table->timestamps();
+            $table->softDeletes();
         });
     }
 

@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int                         $id
  * @property int                         $user_id
  * @property string                      $ip_address
- * @property int                         $browser_agent_id
+ * @property int                         $device_agent_id
  * @property null|int                    $auth_code_id
  * @property bool                        $authenticated
  * @property null|string                 $payload
@@ -25,7 +25,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property Carbon                      $updated_at
  * @property null|Carbon                 $inactivated_at
  * @property User                        $user
- * @property BrowserAgent                $browserAgent
+ * @property DeviceAgent                $browserAgent
  * @property null|AuthCode               $authCode
  * @property Collection|RequestHistory[] $requestHistory
  */
@@ -41,7 +41,7 @@ class Session extends Model
         'id',
         'user_id',
         'ip_address',
-        'browser_agent_id',
+        'device_agent_id',
         'auth_code_id',
         'authenticated',
         'active',
@@ -109,7 +109,7 @@ class Session extends Model
      */
     public function browserAgent()
     {
-        return $this->belongsTo(BrowserAgent::class, 'browser_agent_id', 'id');
+        return $this->belongsTo(DeviceAgent::class, 'device_agent_id', 'id');
     }
 
     /**

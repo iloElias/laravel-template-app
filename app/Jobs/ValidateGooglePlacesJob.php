@@ -1,7 +1,5 @@
 <?php
 
-// app/Jobs/ValidateGooglePlacesJob.php
-
 namespace App\Jobs;
 
 use App\Services\TransportRequestService;

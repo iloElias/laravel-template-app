@@ -1,4 +1,4 @@
-# Agrofast API
+# Laravel API
 
 Use o seguinte comando para iniciar o serviços da API
 

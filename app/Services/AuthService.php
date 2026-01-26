@@ -2,19 +2,17 @@
 
 namespace App\Services;
 
-use App\Enums\UserAction;
 use App\Exception\InvalidFormException;
 use App\Exception\InvalidRequestException;
 use App\Factories\SessionFactory;
 use App\Factories\TokenFactory;
 use App\Http\Requests\User\UserLoginRequest;
 use App\Http\Requests\User\UserResetPasswordRequest;
-use App\Http\Responses\User\UserDataResponse;
 use App\Jobs\SendMail;
 use App\Mail\ResetPasswordMail;
 use App\Models\Hr\AuthCode;
-use App\Models\Hr\BrowserAgent;
-use App\Models\Hr\RememberBrowser;
+use App\Models\Hr\DeviceAgent;
+use App\Models\Hr\RememberDevice;
 use App\Models\Hr\User;
 use App\Services\Google\GoogleAuthService;
 use Carbon\Carbon;
@@ -47,11 +45,11 @@ class AuthService
             throw new InvalidFormException(__('validation.current_password'), ['password' => __('validation.current_password')]);
         }
 
-        $browserFingerprint = $request->header('Browser-Agent');
-        $browserAgent = BrowserAgent::where('fingerprint', $browserFingerprint)->first();
+        $browserFingerprint = $request->header('Device-Agent');
+        $browserAgent = DeviceAgent::where('fingerprint', $browserFingerprint)->first();
 
-        $remember = RememberBrowser::where('user_id', $user->id)
-            ->where('browser_agent_id', $browserAgent->id)
+        $remember = RememberDevice::where('user_id', $user->id)
+            ->where('device_agent_id', $browserAgent->id)
             ->where('created_at', '>=', Carbon::now()->subDays(30))
             ->first()
         ;
@@ -66,18 +64,17 @@ class AuthService
         }
 
         if (isset($credentials['remember']) && $credentials['remember'] === 'true' && !$remember) {
-            RememberBrowser::create([
+            RememberDevice::create([
                 'user_id' => $user->id,
-                'browser_agent_id' => $browserAgent->id,
+                'device_agent_id' => $browserAgent->id,
             ]);
         }
 
         $jwt = TokenFactory::create($user, $session);
 
         return [
-            'user' => UserDataResponse::withDocument($user),
+            'user' => $user,
             'token' => $jwt,
-            'auth' => ($user->email_verified && ($user->email_two_factor_auth || $remember)) ? UserAction::AUTHENTICATED->value : UserAction::AUTHENTICATE->value,
         ];
     }
 
@@ -115,7 +112,7 @@ class AuthService
         $session->update(['auth_code_id' => $newAuthCode->id]);
 
         return [
-            'user' => UserDataResponse::withDocument($user),
+            'user' => $user,
         ];
     }
 
@@ -177,7 +174,7 @@ class AuthService
         $jwt = TokenFactory::create($user, $session);
 
         return [
-            'user' => UserDataResponse::withDocument($user),
+            'user' => $user,
             'token' => $jwt,
         ];
     }
@@ -192,11 +189,11 @@ class AuthService
             throw new ValidationException('user_not_found');
         }
 
-        $browserFingerprint = $request->header('Browser-Agent');
-        $browserAgent = BrowserAgent::where('fingerprint', $browserFingerprint)->first();
+        $browserFingerprint = $request->header('Device-Agent');
+        $browserAgent = DeviceAgent::where('fingerprint', $browserFingerprint)->first();
 
-        $remember = RememberBrowser::where('user_id', $user->id)
-            ->where('browser_agent_id', $browserAgent->id)
+        $remember = RememberDevice::where('user_id', $user->id)
+            ->where('device_agent_id', $browserAgent->id)
             ->where('created_at', '>=', Carbon::now()->subDays(30))
             ->first()
         ;
@@ -206,9 +203,9 @@ class AuthService
         $session = SessionFactory::create($user, $request, $browserAgent, $authCode);
 
         if (isset($data['remember']) && $data['remember'] === 'true' && !$remember) {
-            RememberBrowser::create([
+            RememberDevice::create([
                 'user_id' => $user->id,
-                'browser_agent_id' => $browserAgent->id,
+                'device_agent_id' => $browserAgent->id,
             ]);
         }
 
@@ -224,9 +221,8 @@ class AuthService
         $jwt = TokenFactory::create($user, $session);
 
         return [
-            'user' => UserDataResponse::withDocument($user),
+            'user' => $user,
             'token' => $jwt,
-            'auth' => UserAction::AUTHENTICATE->value,
         ];
     }
 
@@ -265,7 +261,6 @@ class AuthService
         return [
             'token' => $data['token'],
             'user' => $data['user'],
-            'auth' => UserAction::AUTHENTICATED->value,
         ];
     }
 }

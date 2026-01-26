@@ -38,7 +38,7 @@ return [
 
     'first_login' => [
         "subject" => "Confirma tu primer acceso",
-        "title" => "¡Bienvenido a Agrofast!",
+        "title" => "¡Bienvenido a " . env('APP_COMERCIAL_NAME') . "!",
         "message" => "¡Gracias por registrarte! Para confirmar tu primer acceso, utiliza el código de verificación a continuación:",
         "confirm_button" => "Confirmar Acceso",
         "expiration" => "Este enlace expira en :expires.",

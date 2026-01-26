@@ -1,6 +1,13 @@
 <?php
 
-use App\Http\Kernel;
+use App\Http\Middleware\DatabaseTransaction;
+use App\Http\Middleware\DeveloperAuth;
+use App\Http\Middleware\DevelopmentEnvironment;
+use App\Http\Middleware\DeviceFingerprint;
+use App\Http\Middleware\LanguageMiddleware;
+use App\Http\Middleware\ResponseErrorMiddleware;
+use App\Http\Middleware\SessionAuth;
+use App\Http\Middleware\UserAuth;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Middleware;
 
@@ -13,16 +20,18 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(
         function (Middleware $middleware) {
-            $app = Application::getInstance();
-            $router = $app->make('router');
-            $kernel = new Kernel($app, $router);
-
-            $kernelAliases = $kernel->getMiddlewareAliases();
-            $middleware->alias(
-                $kernelAliases
-            );
+            $middleware->alias([
+                'auth' => UserAuth::class,
+                'auth.basic' => SessionAuth::class,
+                'lang' => LanguageMiddleware::class,
+                'fingerprint' => DeviceFingerprint::class,
+                'dev.env' => DevelopmentEnvironment::class,
+                'dev.auth' => DeveloperAuth::class,
+                'db.safe' => DatabaseTransaction::class,
+                'response.error' => ResponseErrorMiddleware::class,
+            ]);
         }
     )
-    ->withExceptions(
-    )->create()
+    ->withExceptions()
+    ->create()
 ;
