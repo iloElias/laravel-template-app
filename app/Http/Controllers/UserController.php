@@ -94,7 +94,7 @@ class UserController extends Controller
 
         $user->update($data);
 
-        return response()->json(UserDataResponse::withDocument($user), 200);
+        return response()->json($user, 200);
     }
 
     public function password(UserPasswordUpdateRequest $request)
@@ -114,7 +114,7 @@ class UserController extends Controller
             'password' => Hash::make($data['password']),
         ]);
 
-        return response()->json(UserDataResponse::withDocument($user), 200);
+        return response()->json($user, 200);
     }
 
     public function passwordCreate(UserPasswordCreateRequest $request)
@@ -134,7 +134,7 @@ class UserController extends Controller
             'password' => Hash::make($data['password']),
         ]);
 
-        return response()->json(UserDataResponse::withDocument($user), 200);
+        return response()->json($user, 200);
     }
 
     public function login(UserLoginRequest $request)
@@ -179,15 +179,6 @@ class UserController extends Controller
         $result = $this->authService->authenticate($request);
 
         return response()->json($result, 200);
-    }
-
-    public function setProfileType(UserProfileTypeRequest $request)
-    {
-        $user = User::auth();
-
-        $user->update(['profile_type' => $request->input('profile_type')]);
-
-        return response()->json($user->load(['documents']), 200);
     }
 
     public function authenticationMethods()
@@ -261,6 +252,6 @@ class UserController extends Controller
         $user = User::auth();
         $user->update(['profile_type' => request('profile_type')]);
 
-        return response()->json(UserDataResponse::withDocument($user), 200);
+        return response()->json($user, 200);
     }
 }
