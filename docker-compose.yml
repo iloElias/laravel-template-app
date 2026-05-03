@@ -16,9 +16,26 @@ services:
 
   template-php:
     container_name: template-php
-    extends:
-      file: ../docker-compose.yml
-      service: template-php
+    build:
+      context: .
+      dockerfile: Dockerfile.php.dev
+    restart: always
+    working_dir: /var/www
+    command: >
+      sh -c "
+      php artisan migrate --force &&
+      php artisan queue:work --sleep=3 --tries=3 &
+      exec php-fpm
+      "
+    ports:
+      - "9000:9000"
+    volumes:
+      - ./template-api/:/var/www
+      - ./php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    depends_on:
+      - template-nginx
+    networks:
+      - default-network
 
 volumes:
   nginx-data:

@@ -35,8 +35,8 @@ class AuthSms extends Model
         ];
         $authCode = AuthCode::create($authCodeParams);
 
-        $smsEnabled = env('SMS_SERVICE_ENABLED', false);
-        // Added this verification to avoid sending SMS in local environment. It's really expensive XD.
+        $smsEnabled = config('services.sms.enabled', false);
+
         if ($smsEnabled === true || $smsEnabled === 'true') {
             SendSms::dispatch($user->number, __('sms.authentication.message', ['code' => $code]));
         }

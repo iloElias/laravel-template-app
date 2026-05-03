@@ -3,6 +3,7 @@
 namespace App\Models\System;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 
 /**
@@ -20,25 +21,10 @@ use Illuminate\Support\Carbon;
  */
 class ErrorLog extends Model
 {
-    /**
-     * Enable timestamps (created_at and updated_at) as defined in the migration.
-     *
-     * @var bool
-     */
-    public $timestamps = true;
+    use SoftDeletes;
 
-    /**
-     * Define the schema-qualified table name.
-     *
-     * @var string
-     */
     protected $table = 'system.error_log';
 
-    /**
-     * Fields that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'url',
         'error_message',
@@ -46,11 +32,6 @@ class ErrorLog extends Model
         'request_data',
     ];
 
-    /**
-     * Cast the request_data column to an array.
-     *
-     * @var array<string, string>
-     */
     protected $casts = [
         'request_data' => 'array',
     ];

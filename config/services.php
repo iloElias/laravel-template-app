@@ -40,6 +40,10 @@ return [
         'from' => env('SMS_SERVICE_FROM', env('APP_COMERCIAL_NAME')),
     ],
 
+    'sms' => [
+        'enabled' => env('SMS_SERVICE_ENABLED', false),
+    ],
+
     'mercadopago' => [
         'redirect_uri' => env('MERCADOPAGO_REDIRECT_URI'),
         'client_id' => env('MERCADOPAGO_CLIENT_ID'),
@@ -51,5 +55,13 @@ return [
     'google' => [
         'places_key' => env('GOOGLE_PLACES_KEY'),
         'matrix_key' => env('GOOGLE_MATRIX_KEY'),
+    ],
+
+    'clickhouse' => [
+        'host' => env('CLICKHOUSE_HOST', '127.0.0.1'),
+        'port' => env('CLICKHOUSE_PORT', 8123),
+        'database' => env('CLICKHOUSE_DATABASE', 'default'),
+        'username' => env('CLICKHOUSE_USERNAME', 'default'),
+        'password' => env('CLICKHOUSE_PASSWORD', ''),
     ],
 ];

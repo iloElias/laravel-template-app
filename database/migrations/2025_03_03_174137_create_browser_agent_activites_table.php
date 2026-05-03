@@ -12,7 +12,7 @@ return new class () extends Migration {
     public function up(): void
     {
         Schema::create('hr.suspicious_device_agent', function (Blueprint $table) {
-            $table->id()->primary();
+            $table->id();
             $table->foreignId('device_agent_id')->constrained('hr.device_agent');
             $table->string('reason');
             $table->timestamps();
@@ -20,7 +20,7 @@ return new class () extends Migration {
         });
 
         Schema::create('hr.banned_device_agent', function (Blueprint $table) {
-            $table->id()->primary();
+            $table->id();
             $table->foreignId('device_agent_id')->constrained('hr.device_agent');
             $table->string('reason');
             $table->timestamps();

@@ -12,7 +12,7 @@ return new class () extends Migration {
     public function up(): void
     {
         Schema::create('hr.timeout', function (Blueprint $table) {
-            $table->id()->primary();
+            $table->id();
             $table->foreignId('user_id')->constrained('hr.user')->onDelete('cascade');
             $table->string('reason')->nullable();
             $table->timestamp('timeout_start');

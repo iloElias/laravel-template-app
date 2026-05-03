@@ -12,7 +12,7 @@ return new class () extends Migration {
     public function up(): void
     {
         Schema::create('hr.auth_code', function (Blueprint $table) {
-            $table->id()->primary();
+            $table->id();
             $table->foreignId('user_id')->constrained('hr.user')->onDelete('cascade');
             $table->string('ip_address', 45)->nullable();
             $table->text('user_agent')->nullable();

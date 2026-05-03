@@ -9,7 +9,7 @@ return new class () extends Migration {
     public function up(): void
     {
         Schema::create('system.error_logs', function (Blueprint $table) {
-            $table->id()->primary();
+            $table->id();
             $table->text('json');
             $table->text('params');
             $table->timestamp('created_in')->default(DB::raw('CURRENT_TIMESTAMP'));

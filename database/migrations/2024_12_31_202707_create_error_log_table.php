@@ -9,10 +9,10 @@ return new class () extends Migration {
     /**
      * Run the migrations.
      */
-    public function up()
+    public function up(): void
     {
         Schema::create('system.error_log', function (Blueprint $table) {
-            $table->id()->primary();
+            $table->id();
             $table->string('url')->nullable();
             $table->text('error_message');
             $table->text('stack_trace')->nullable();

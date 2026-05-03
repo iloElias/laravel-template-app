@@ -3,35 +3,28 @@
 namespace App\Models\Hr;
 
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * @property int         $id
- * @property int         $user_id
  * @property int         $device_agent_id
+ * @property string      $reason
  * @property Carbon      $created_at
  * @property Carbon      $updated_at
  * @property null|Carbon $deleted_at
  */
-class RememberDevice extends Model
+class SuspiciousDeviceAgent extends Model
 {
-    use HasFactory;
     use SoftDeletes;
 
-    protected $table = 'hr.remember_device';
+    protected $table = 'hr.suspicious_device_agent';
 
     protected $fillable = [
-        'user_id',
         'device_agent_id',
+        'reason',
     ];
-
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class);
-    }
 
     public function deviceAgent(): BelongsTo
     {

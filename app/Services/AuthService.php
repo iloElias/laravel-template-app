@@ -164,8 +164,8 @@ class AuthService
             $user->update(['number_verified' => true, 'number_verified_at' => Carbon::now()]);
         }
 
-        if ($session->storage_get('reset_password')) {
-            $session->storage_unset('reset_password');
+        if ($session->storageGet('reset_password')) {
+            $session->storageUnset('reset_password');
             $user->update([
                 'password' => '',
             ]);
@@ -214,7 +214,7 @@ class AuthService
             'code' => $authCode->code,
         ]);
 
-        $session->storage_set([
+        $session->storageSet([
             'reset_password' => true,
         ]);
 
