@@ -36,16 +36,31 @@ pecl install redis
 
 ```bash
 php -m | grep redis
+# Deve mostrar: redis
 ```
 
-### 3. Limpar cache do Laravel
+### 3. Limpar TODOS os caches do Laravel
 
 ```bash
-php artisan config:clear
-php artisan cache:clear
+php artisan optimize:clear
 ```
 
-### 4. Reiniciar servidor
+**Isso limpa automaticamente:**
+
+- ✅ Config cache
+- ✅ Application cache
+- ✅ Compiled views
+- ✅ Routes cache
+- ✅ Events cache
+- ✅ Compiled files
+
+### 4. Regenerar autoloader (se necessário)
+
+```bash
+composer dump-autoload
+```
+
+### 5. Reiniciar servidor
 
 ```bash
 bash script/serve.sh
@@ -82,23 +97,21 @@ Conecte ao container e execute:
 ```bash
 # Dokploy CLI ou Docker exec
 docker exec -it <container-name> bash
-php artisan config:clear
-php artisan cache:clear
+php artisan optimize:clear
+composer dump-autoload
+exit
 ```
 
 #### Opção 3: Garantir Ordem de Inicialização
 
-O script [script/cache.sh](../script/cache.sh) foi atualizado para **sempre limpar cache antes de criar novo**:
+O script [script/cache.sh](../script/cache.sh) usa `optimize:clear` para **limpeza completa**:
 
 ```bash
 #!/bin/bash
 set -e
 
-echo "CI  Clearing previous cache"
-php artisan config:clear
-php artisan route:clear
-php artisan view:clear
-php artisan cache:clear
+echo "CI  Clearing all Laravel caches"
+php artisan optimize:clear
 
 echo "CI  Caching configuration for production"
 php artisan config:cache
