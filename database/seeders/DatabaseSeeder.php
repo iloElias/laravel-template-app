@@ -18,7 +18,7 @@ class DatabaseSeeder extends Seeder
                 UserSeeder::class,
             ]);
 
-            $this->command->info('✓ Development seeders executed');
+            $this->command->info('INFO  Development seeders executed.');
             return;
         }
 
@@ -30,6 +30,6 @@ class DatabaseSeeder extends Seeder
         //     ]);
         // }
 
-        $this->command->info('✓ No seeders to run for environment: ' . app()->environment());
+        $this->command->info('INFO  No seeders to run for environment: ' . app()->environment() . '.');
     }
 }

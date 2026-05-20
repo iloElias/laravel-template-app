@@ -1,5 +1,5 @@
 #!/bin/bash
 set -e
 
-echo "Running database migrations"
+echo "CI  Running database migrations"
 php artisan migrate --force --database=pgsql_direct
