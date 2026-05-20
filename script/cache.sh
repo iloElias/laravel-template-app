@@ -1,8 +1,12 @@
 #!/bin/bash
 set -e
 
-echo "CI  Clearing all Laravel caches"
-php artisan optimize:clear
+# Limpa apenas caches baseados em arquivo (não requer conexão com Redis)
+echo "CI  Clearing file-based Laravel caches"
+php artisan config:clear
+php artisan route:clear
+php artisan view:clear
+php artisan event:clear
 
 echo "CI  Caching configuration for production"
 php artisan config:cache
