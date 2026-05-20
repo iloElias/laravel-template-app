@@ -18,6 +18,7 @@ API RESTful em Laravel 12 para plataformas de aluguel de espaços esportivos —
 - [Rotas Principais](#rotas-principais)
 - [Desenvolvimento Local](#desenvolvimento-local)
 - [CI/CD e Monitoramento](#cicd-e-monitoramento)
+- [🔧 Troubleshooting](#-troubleshooting)
 - [Licenças](#licenças-de-terceiros-relevantes)
 
 **📚 Documentação adicional:**
@@ -490,6 +491,45 @@ curl http://localhost/api/health/queue
 
 # Cache (Redis)
 curl http://localhost/api/health/cache
+```
+
+---
+
+## 🔧 Troubleshooting
+
+### Problemas comuns e soluções
+
+Para guias detalhados de resolução de problemas, consulte:
+
+- **[TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)** — Diagnóstico e correção de erros
+
+**Problemas frequentes:**
+
+- ❌ **"Class 'Redis' not found"**  
+  → Extensão phpredis não instalada ou cache corrompido  
+  → Ver [TROUBLESHOOTING.md - Redis](docs/TROUBLESHOOTING.md#%EF%B8%8F-erro-class-redis-not-found)
+
+- ❌ **Erro de conexão com PgBouncer**  
+  → Usar nome do container (`pgbouncer`) não DNS externo  
+  → Verificar AUTH_TYPE=scram-sha-256 no PgBouncer
+
+- ❌ **ClickHouse "wrong password type"**  
+  → Porta incorreta: usar 8123 (HTTP) não 9000 (Native TCP)  
+  → Ver [CLICKHOUSE.md](docs/CLICKHOUSE.md)
+
+- ❌ **Queue workers não processam jobs**  
+  → Verificar se script/queue.sh está rodando  
+  → Checar logs: `docker logs <container> | grep queue`
+
+**Scripts de deploy:**
+
+```bash
+# Ordem de execução no ci.sh
+./script/cache.sh       # Limpa cache antigo + cria novo
+./script/migration.sh   # Migrações PostgreSQL
+./script/seed.sh        # Seeders (condicional por ambiente)
+./script/queue.sh       # Workers RabbitMQ (background)
+./script/serve.sh       # Laravel + Reverb
 ```
 
 ---
