@@ -1,8 +1,5 @@
 [project]
 type = "php"
 
-[phases.setup]
-nixPkgs = ["php83Extensions.redis", "php83Extensions.pdo_pgsql"]
-
 [commands]
 run = "./ci.sh"
