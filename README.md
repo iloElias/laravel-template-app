@@ -167,9 +167,9 @@ Filas utilizadas:
 | `CLICKHOUSE_USERNAME` | `default`                                               |
 | `CLICKHOUSE_PASSWORD` | Vazio por padrão                                        |
 
-**⚠️ Configuração de DNS/Proxy:** Para usar `olap.mesf.app` em produção, configure o proxy reverso (Nginx/Cloudflare) para apontar para a **porta 8123** (HTTP API), **NÃO 9000** (Native TCP). Veja [CLICKHOUSE.md](CLICKHOUSE.md) para detalhes completos.
+**⚠️ Configuração de DNS/Proxy:** Para usar `clickhouse.mesf.app` em produção, configure o proxy reverso (Nginx/Cloudflare/Dokploy) para apontar para a **porta 8123** (HTTP API), **NÃO 9000** (Native TCP). Veja [CLICKHOUSE.md](CLICKHOUSE.md) para detalhes completos.
 
-**Migrations automáticas:** As tabelas `request_history` e `error_log` são criadas automaticamente via `php artisan clickhouse:migrate` (executado pelo `script/migration.sh`). Para adicionar novas tabelas, crie arquivos `.sql` em `database/clickhouse/`.
+**Criação de tabelas:** Execute os arquivos SQL em `database/clickhouse/` manualmente via HTTP API ou interface web. Veja [CLICKHOUSE.md](CLICKHOUSE.md) para instruções detalhadas.
 
 ### Object Storage (RustFS)
 
@@ -319,7 +319,7 @@ Em produção, remova `RUSTFS_UNSAFE_BYPASS_DISK_CHECK=true` do `docker-compose.
 
 ```bash
 script/queue.sh      # Inicia workers
-script/migration.sh  # Executa migrations (PostgreSQL via pgsql_direct + ClickHouse)
+script/migration.sh  # Executa migrations PostgreSQL via pgsql_direct
 script/schedule.sh   # Inicia o scheduler
 script/serve.sh      # Inicia PHP dev server + Reverb
 script/cache.sh      # Limpa caches

@@ -301,28 +301,114 @@ dispatch(new LogErrorEvent([
 
 ---
 
-## 🚀 Migrations Automáticas
+## 🚀 Criação Manual das Tabelas
 
-### Comando artisan
+### Opção 1: Script Helper (Recomendado)
 
 ```bash
-# Executa todos os arquivos .sql em database/clickhouse/
-php artisan clickhouse:migrate
+# Definir senha
+export CLICKHOUSE_PASSWORD=sua_senha_aqui
+
+# Executar script
+bash database/clickhouse/create_tables.sh
+
+# Ou para ambiente específico:
+CLICKHOUSE_URL=https://clickhouse.mesf.app \
+CLICKHOUSE_USER=default \
+CLICKHOUSE_PASSWORD=sua_senha \
+bash database/clickhouse/create_tables.sh
 ```
 
-**Como funciona:**
+O script automaticamente:
 
-1. Lê configuração de `config/services.clickhouse`
-2. Busca todos os arquivos `database/clickhouse/*.sql`
-3. Executa cada arquivo via HTTP POST
-4. Loga sucesso/erro no console
+- ✅ Lê todos os arquivos `.sql` em `database/clickhouse/`
+- ✅ Executa cada um via HTTP API
+- ✅ Mostra status de sucesso/erro
+- ✅ Verifica código HTTP de resposta
 
-### Integração com migrations normais
+### Opção 2: Interface Web
+
+1. Acesse `https://clickhouse.mesf.app/play`
+2. Faça login com as credenciais:
+    ```
+    User: default
+    Password: <sua_senha>
+    ```
+3. Cole e execute cada arquivo SQL de `database/clickhouse/`:
+
+**error_log.sql:**
+
+```sql
+CREATE TABLE IF NOT EXISTS error_log (
+    url Nullable(String),
+    error_message String,
+    stack_trace Nullable(String),
+    request_data Nullable(String),
+    created_at DateTime DEFAULT now()
+) ENGINE = MergeTree()
+ORDER BY (created_at);
+```
+
+**request_history.sql:**
+
+```sql
+CREATE TABLE IF NOT EXISTS request_history (
+    session_id UInt64,
+    route String,
+    method String,
+    payload Nullable(String),
+    created_at DateTime DEFAULT now()
+) ENGINE = MergeTree()
+ORDER BY (created_at, session_id);
+```
+
+### Opção 3: Via curl (HTTP API)
 
 ```bash
-# script/migration.sh
-php artisan migrate --force --database=pgsql_direct
-php artisan clickhouse:migrate
+# Definir variáveis
+CLICKHOUSE_URL="https://clickhouse.mesf.app"
+CLICKHOUSE_USER="default"
+CLICKHOUSE_PASSWORD="sua_senha_aqui"
+
+# Criar tabela error_log
+curl -X POST "$CLICKHOUSE_URL/" \
+  -u "$CLICKHOUSE_USER:$CLICKHOUSE_PASSWORD" \
+  -d "CREATE TABLE IF NOT EXISTS error_log (
+    url Nullable(String),
+    error_message String,
+    stack_trace Nullable(String),
+    request_data Nullable(String),
+    created_at DateTime DEFAULT now()
+) ENGINE = MergeTree()
+ORDER BY (created_at)"
+
+# Criar tabela request_history
+curl -X POST "$CLICKHOUSE_URL/" \
+  -u "$CLICKHOUSE_USER:$CLICKHOUSE_PASSWORD" \
+  -d "CREATE TABLE IF NOT EXISTS request_history (
+    session_id UInt64,
+    route String,
+    method String,
+    payload Nullable(String),
+    created_at DateTime DEFAULT now()
+) ENGINE = MergeTree()
+ORDER BY (created_at, session_id)"
+```
+
+### Verificar tabelas criadas
+
+```bash
+# Listar tabelas
+curl "$CLICKHOUSE_URL/?query=SHOW%20TABLES" \
+  -u "$CLICKHOUSE_USER:$CLICKHOUSE_PASSWORD"
+
+# Ver estrutura detalhada
+curl "$CLICKHOUSE_URL/" \
+  -u "$CLICKHOUSE_USER:$CLICKHOUSE_PASSWORD" \
+  -d "SELECT name, engine, total_rows
+      FROM system.tables
+      WHERE database = 'default'
+      FORMAT Pretty"
 ```
 
 ---
