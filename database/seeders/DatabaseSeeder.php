@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use Database\Seeders\Production\DocumentTypeSeeder;
+use Database\Seeders\Development\UserSeeder;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -12,8 +12,24 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->call([
-            DocumentTypeSeeder::class,
-        ]);
+        // Seeders de desenvolvimento (apenas em ambiente local/dev)
+        if (app()->environment(['local', 'development'])) {
+            $this->call([
+                UserSeeder::class,
+            ]);
+
+            $this->command->info('✓ Development seeders executed');
+            return;
+        }
+
+        // Seeders de produção (staging/production)
+        // if (app()->environment(['staging', 'production'])) {
+        //     $this->call([
+        //         // Adicione seeders de produção aqui se necessário
+        //         // Ex: RolesAndPermissionsSeeder::class,
+        //     ]);
+        // }
+
+        $this->command->info('✓ No seeders to run for environment: ' . app()->environment());
     }
 }

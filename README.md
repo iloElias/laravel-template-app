@@ -323,8 +323,24 @@ script/migration.sh  # Executa migrations PostgreSQL via pgsql_direct
 script/schedule.sh   # Inicia o scheduler
 script/serve.sh      # Inicia PHP dev server + Reverb
 script/cache.sh      # Limpa caches
-script/seed.sh       # Executa seeders
+script/seed.sh       # Executa seeders (condicional por ambiente)
 ```
+
+**Deploy automatizado (`ci.sh`):**
+
+```bash
+# Executado automaticamente no deploy (Dokploy/CI)
+1. cache.sh       → Limpa caches de configuração/rotas/views
+2. migration.sh   → Executa migrations no PostgreSQL
+3. seed.sh        → Executa seeders (condicional por APP_ENV)
+4. queue.sh       → Inicia workers em background
+5. serve.sh       → Inicia servidor PHP + Reverb
+```
+
+**Seeders condicionais:**
+
+- `local`/`development` → Executa seeders de desenvolvimento (usuários de teste)
+- `staging`/`production` → Não executa seeders (banco já populado)
 
 ---
 

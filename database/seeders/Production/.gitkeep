@@ -1,0 +1,15 @@
+# Production Seeders
+
+Seeders neste diretório são executados **apenas em produção/staging**.
+
+Use para dados essenciais que devem existir:
+
+- Roles e permissões padrão
+- Configurações do sistema
+- Dados mestres (países, moedas, etc)
+
+**NÃO use para:**
+
+- Dados de teste
+- Usuários fictícios
+- Dados sensíveis (use migrations ou configuração manual)
