@@ -1,6 +1,13 @@
 #!/bin/bash
-set -e
 
-echo "Starting Laravel queue worker in background"
-nohup php artisan queue:work > /dev/null 2>&1 &
-disown
+# cron: */30 * * * *
+# command: bash /app/script/queue.sh
+# O worker roda por no máximo 29 minutos (--max-time=1740) e encerra antes
+
+echo "Killing existing Laravel queue workers"
+pkill -f "artisan queue:work" || true
+
+echo "Starting Laravel queue worker"
+cd /app && php artisan queue:work --tries=3 --max-time=1740 &
+
+exit 0

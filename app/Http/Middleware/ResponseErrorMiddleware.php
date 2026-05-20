@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use App\Exception\InvalidFormException;
 use App\Exception\InvalidRequestException;
+use App\Jobs\LogErrorEvent;
 use App\Support\Traits\HandlesJsonErrors;
 use App\Utils;
 use Dotenv\Exception\ValidationException as ExceptionValidationException;
@@ -38,6 +39,16 @@ class ResponseErrorMiddleware
         } catch (InvalidRequestException $e) {
             return $this->returnRequestErrors($e);
         } catch (\Throwable $e) {
+            LogErrorEvent::dispatch([
+                'url' => request()->fullUrl(),
+                'error_message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString(),
+                'request_data' => json_encode(request()->except(['password', 'password_confirmation', 'token', 'secret'])),
+                'created_at' => now()->toDateTimeString(),
+            ]);
+
+            \Sentry\captureException($e);
+
             if (!Utils::isProduction()) {
                 throw $e;
             }

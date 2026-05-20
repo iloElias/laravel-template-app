@@ -5,10 +5,9 @@ namespace App\Services\Google;
 use App\Exception\InvalidRequestException;
 use App\Factories\SessionFactory;
 use App\Factories\TokenFactory;
+use App\Models\Hr\AuthCode;
 use App\Models\Hr\DeviceAgent;
-use App\Models\Hr\Session;
 use App\Models\Hr\User;
-use App\Services\Chat\ChatService;
 use Google\Auth\AccessToken;
 use Google\Client;
 use Illuminate\Http\Request;
@@ -70,17 +69,24 @@ class GoogleAuthService
      */
     public function createUserFromGoogle(Request $request, $payload)
     {
+        $googleEmailVerified = $payload['email_verified'] ?? $payload['verified_email'] ?? false;
+
         $user = User::create([
             'uuid' => Str::uuid()->toString(),
             'email' => $payload['email'],
-            'email_verified' => $payload['email_verified'] ?? $payload['verified_email'] ?? false,
+            'email_verified' => $googleEmailVerified,
             'password' => '',
             'name' => $payload['given_name'],
             'surname' => $payload['family_name'] ?? '',
             'profile_picture' => $payload['picture'] ?? null,
         ]);
+
         $browserAgent = DeviceAgent::where('fingerprint', $request->header('Device-Agent'))->first();
-        $session = SessionFactory::create($user, $request, $browserAgent, null);
+
+        // Se Google verificou o email, não precisa de código; caso contrário, requer verificação
+        $authCode = $googleEmailVerified ? null : AuthCode::createCode($user->id, AuthCode::EMAIL);
+        $session = SessionFactory::create($user, $request, $browserAgent, $authCode);
+
         $jwt = TokenFactory::create($user, $session);
 
         return [
@@ -100,7 +106,12 @@ class GoogleAuthService
     public function loginFromGoogle(User $user, Request $request, $payload)
     {
         $browserAgent = DeviceAgent::where('fingerprint', $request->header('Device-Agent'))->first();
-        $session = SessionFactory::create($user, $request, $browserAgent, null);
+
+        // Mesma lógica do login normal: código no primeiro login ou se 2FA ativo
+        $needsCode = !$user->email_verified || $user->email_two_factor_auth;
+        $authCode = $needsCode ? AuthCode::createCode($user->id, AuthCode::EMAIL) : null;
+
+        $session = SessionFactory::create($user, $request, $browserAgent, $authCode);
         $jwt = TokenFactory::create($user, $session);
 
         $user->update([

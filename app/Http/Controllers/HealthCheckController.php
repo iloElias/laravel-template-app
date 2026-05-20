@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Facades\Redis;
 
 class HealthCheckController extends Controller
 {
@@ -45,12 +47,21 @@ class HealthCheckController extends Controller
     public function cache()
     {
         try {
-            $cache = cache()->get('health_check', 'OK');
+            $key = 'health_check:' . uniqid();
+            Cache::put($key, 'ok', 5);
+
+            $value = Cache::get($key);
+            Cache::forget($key);
+
+            if ($value !== 'ok') {
+                throw new \RuntimeException('Cache read/write mismatch');
+            }
 
             return response()->json([
                 'message' => 'OK',
                 'data' => [
-                    'status' => $cache,
+                    'status' => 'healthy',
+                    'driver' => config('cache.default'),
                     'timestamp' => now(),
                 ],
             ]);
@@ -59,6 +70,7 @@ class HealthCheckController extends Controller
                 'message' => 'Cache connection failed',
                 'data' => [
                     'status' => 'unhealthy',
+                    'driver' => config('cache.default'),
                     'error' => $e->getMessage(),
                     'timestamp' => now(),
                 ],
@@ -74,13 +86,38 @@ class HealthCheckController extends Controller
             return response()->json([
                 'message' => 'OK',
                 'data' => [
-                    'status' => $queue,
+                    'status' => 'healthy',
+                    'driver' => $queue,
                     'timestamp' => now(),
                 ],
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Queue connection failed',
+                'data' => [
+                    'status' => 'unhealthy',
+                    'error' => $e->getMessage(),
+                    'timestamp' => now(),
+                ],
+            ], 500);
+        }
+    }
+
+    public function redis()
+    {
+        try {
+            Redis::ping();
+
+            return response()->json([
+                'message' => 'OK',
+                'data' => [
+                    'status' => 'healthy',
+                    'timestamp' => now(),
+                ],
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Redis connection failed',
                 'data' => [
                     'status' => 'unhealthy',
                     'error' => $e->getMessage(),

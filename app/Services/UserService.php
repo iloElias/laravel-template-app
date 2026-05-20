@@ -5,12 +5,9 @@ namespace App\Services;
 use App\Factories\SessionFactory;
 use App\Factories\TokenFactory;
 use App\Http\Requests\User\UserStoreRequest;
-use App\Models\Error;
 use App\Models\Hr\AuthCode;
 use App\Models\Hr\DeviceAgent;
-use App\Models\Hr\RememberDevice;
 use App\Models\Hr\User;
-use App\Services\Chat\ChatService;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -33,10 +30,6 @@ class UserService
      */
     public function createUser(array $data, UserStoreRequest $request): array
     {
-        if (!empty($validated)) {
-            throw new ValidationException($validated);
-        }
-
         $data['password'] = Hash::make($data['password']);
         $data['uuid'] = Str::uuid()->toString();
         $user = User::create($data);
@@ -45,13 +38,6 @@ class UserService
         $browserAgent = DeviceAgent::where('fingerprint', $request->header('Device-Agent'))->first();
 
         $session = SessionFactory::create($user, $request, $browserAgent, $authCode);
-
-        if (!empty($data['remember']) && $data['remember'] === 'true') {
-            RememberDevice::create([
-                'user_id' => $user->id,
-                'device_agent_id' => $browserAgent->id,
-            ]);
-        }
 
         $jwt = TokenFactory::create($user, $session);
 

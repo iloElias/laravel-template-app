@@ -14,6 +14,7 @@ Route::middleware(['response.error', 'lang'])->group(function () {
         Route::get('/database', [HealthCheckController::class, 'database'])->name('database');
         Route::get('/cache', [HealthCheckController::class, 'cache'])->name('cache');
         Route::get('/queue', [HealthCheckController::class, 'queue'])->name('queue');
+        Route::get('/redis', [HealthCheckController::class, 'redis'])->name('redis');
     });
 
     // Debug routes (development environment only)
@@ -41,15 +42,15 @@ Route::middleware(['response.error', 'lang'])->group(function () {
         });
         Route::middleware(['db.safe', 'fingerprint'])->group(function () {
             Route::get('/code-length', [UserController::class, 'codeLength'])->name('code-length');
-            Route::post('/reset-password', [UserController::class, 'resetPassword'])->name('reset-password');
-            Route::post('/sign-in', [UserController::class, 'login'])->name('login');
-            Route::post('/sign-up', [UserController::class, 'store'])->name('register');
-            Route::post('/google-auth', [UserController::class, 'googleAuth'])->name('google-auth');
-            Route::post('/google-auth/v2', [UserController::class, 'googleAuthV2'])->name('google-auth.v2');
+            Route::post('/reset-password', [UserController::class, 'resetPassword'])->name('reset-password')->middleware('throttle:5,1');
+            Route::post('/sign-in', [UserController::class, 'login'])->name('login')->middleware('throttle:10,1');
+            Route::post('/sign-up', [UserController::class, 'store'])->name('register')->middleware('throttle:5,1');
+            Route::post('/google-auth', [UserController::class, 'googleAuth'])->name('google-auth')->middleware('throttle:10,1');
+            Route::post('/google-auth/v2', [UserController::class, 'googleAuthV2'])->name('google-auth.v2')->middleware('throttle:10,1');
             Route::middleware(['auth.basic'])->group(function () {
                 Route::get('/', [UserController::class, 'authenticate'])->name('authenticate');
                 Route::get('/methods', [UserController::class, 'authenticationMethods'])->name('methods');
-                Route::get('/resend-code', [UserController::class, 'resendCode'])->name('resend-code');
+                Route::get('/resend-code', [UserController::class, 'resendCode'])->name('resend-code')->middleware('throttle:3,1');
             });
         });
     });

@@ -12,7 +12,6 @@ use App\Jobs\SendMail;
 use App\Mail\ResetPasswordMail;
 use App\Models\Hr\AuthCode;
 use App\Models\Hr\DeviceAgent;
-use App\Models\Hr\RememberDevice;
 use App\Models\Hr\User;
 use App\Services\Google\GoogleAuthService;
 use Carbon\Carbon;
@@ -48,26 +47,16 @@ class AuthService
         $browserFingerprint = $request->header('Device-Agent');
         $browserAgent = DeviceAgent::where('fingerprint', $browserFingerprint)->first();
 
-        $remember = RememberDevice::where('user_id', $user->id)
-            ->where('device_agent_id', $browserAgent->id)
-            ->where('created_at', '>=', Carbon::now()->subDays(30))
-            ->first()
-        ;
-
-        $authType = AuthCode::EMAIL;
-        $authCode = ($user->email_verified && ($user->email_two_factor_auth || $remember)) ? null : AuthCode::createCode($user->id, $authType);
+        // Lógica 2FA: código obrigatório no primeiro login (!email_verified)
+        // ou quando 2FA está ativo (email_two_factor_auth=true)
+        $needsCode = !$user->email_verified || $user->email_two_factor_auth;
+        $authCode = $needsCode ? AuthCode::createCode($user->id, AuthCode::EMAIL) : null;
 
         $session = SessionFactory::create($user, $request, $browserAgent, $authCode);
 
-        if ($user->email_verified && $remember) {
+        // Se não precisa de código, já autentica direto
+        if (!$needsCode) {
             $session->update(['authenticated' => true]);
-        }
-
-        if (isset($credentials['remember']) && $credentials['remember'] === 'true' && !$remember) {
-            RememberDevice::create([
-                'user_id' => $user->id,
-                'device_agent_id' => $browserAgent->id,
-            ]);
         }
 
         $jwt = TokenFactory::create($user, $session);
@@ -192,22 +181,10 @@ class AuthService
         $browserFingerprint = $request->header('Device-Agent');
         $browserAgent = DeviceAgent::where('fingerprint', $browserFingerprint)->first();
 
-        $remember = RememberDevice::where('user_id', $user->id)
-            ->where('device_agent_id', $browserAgent->id)
-            ->where('created_at', '>=', Carbon::now()->subDays(30))
-            ->first()
-        ;
-
+        // Reset password sempre requer código de verificação
         $authCode = AuthCode::createCode($user->id, AuthCode::EMAIL);
 
         $session = SessionFactory::create($user, $request, $browserAgent, $authCode);
-
-        if (isset($data['remember']) && $data['remember'] === 'true' && !$remember) {
-            RememberDevice::create([
-                'user_id' => $user->id,
-                'device_agent_id' => $browserAgent->id,
-            ]);
-        }
 
         SendMail::dispatch($user->email, ResetPasswordMail::class, [
             'user_id' => $user->id,
@@ -254,9 +231,10 @@ class AuthService
             $data = $this->googleAuthService->loginFromGoogle($user, $request, $payload);
         }
 
-        $data['session']->update([
-            'authenticated' => true,
-        ]);
+        // Se a sessão não requer código (authCode=null), marca como autenticada
+        if (!$data['session']->auth_code_id) {
+            $data['session']->update(['authenticated' => true]);
+        }
 
         return [
             'token' => $data['token'],

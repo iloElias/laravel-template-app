@@ -93,6 +93,29 @@ return [
             'prefix_indexes' => true,
             'search_path' => 'public',
             'sslmode' => 'prefer',
+            // PDO::ATTR_EMULATE_PREPARES é necessário para compatibilidade com
+            // PgBouncer em POOL_MODE=transaction (evita named prepared statements).
+            'options' => [
+                PDO::ATTR_EMULATE_PREPARES => true,
+            ],
+        ],
+
+        // Conexão direta ao Postgres, sem PgBouncer.
+        // Usada exclusivamente em migrations e seeders, pois eles dependem de
+        // advisory locks e SET search_path que não funcionam em transaction mode.
+        'pgsql_direct' => [
+            'driver' => 'pgsql',
+            'url' => env('DB_URL'),
+            'host' => env('DB_DIRECT_HOST', env('DB_HOST', '127.0.0.1')),
+            'port' => env('DB_DIRECT_PORT', '5432'),
+            'database' => env('DB_DATABASE', 'laravel'),
+            'username' => env('DB_USERNAME', 'root'),
+            'password' => env('DB_PASSWORD', ''),
+            'charset' => env('DB_CHARSET', 'utf8'),
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'search_path' => 'public',
+            'sslmode' => 'prefer',
         ],
 
         'sqlsrv' => [

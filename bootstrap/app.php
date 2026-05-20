@@ -5,6 +5,7 @@ use App\Http\Middleware\DeveloperAuth;
 use App\Http\Middleware\DevelopmentEnvironment;
 use App\Http\Middleware\DeviceFingerprint;
 use App\Http\Middleware\LanguageMiddleware;
+use App\Http\Middleware\LogRequestMiddleware;
 use App\Http\Middleware\ResponseErrorMiddleware;
 use App\Http\Middleware\SessionAuth;
 use App\Http\Middleware\UserAuth;
@@ -20,6 +21,8 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(
         function (Middleware $middleware) {
+            $middleware->appendToGroup('api', LogRequestMiddleware::class);
+
             $middleware->alias([
                 'auth' => UserAuth::class,
                 'auth.basic' => SessionAuth::class,
