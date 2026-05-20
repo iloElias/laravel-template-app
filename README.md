@@ -17,6 +17,13 @@ API RESTful em Laravel 12 para plataformas de aluguel de espaços esportivos —
 - [Filas e Workers](#filas-e-workers)
 - [Rotas Principais](#rotas-principais)
 - [Desenvolvimento Local](#desenvolvimento-local)
+- [CI/CD e Monitoramento](#cicd-e-monitoramento)
+- [Licenças](#licenças-de-terceiros-relevantes)
+
+**📚 Documentação adicional:**
+
+- [STRIPE.md](STRIPE.md) — Integração completa Stripe (pagamentos, Connect, webhooks)
+- [CLICKHOUSE.md](CLICKHOUSE.md) — Configuração de analytics e proxy reverso
 
 ---
 
@@ -151,13 +158,16 @@ Filas utilizadas:
 
 ### Analytics (ClickHouse)
 
-| Variável              | Descrição                                            |
-| --------------------- | ---------------------------------------------------- |
-| `CLICKHOUSE_HOST`     | `template-clickhouse` (Docker) / `127.0.0.1` (local) |
-| `CLICKHOUSE_PORT`     | `8123` (HTTP API)                                    |
-| `CLICKHOUSE_DATABASE` | `default`                                            |
-| `CLICKHOUSE_USERNAME` | `default`                                            |
-| `CLICKHOUSE_PASSWORD` | Vazio por padrão                                     |
+| Variável              | Descrição                                               |
+| --------------------- | ------------------------------------------------------- |
+| `CLICKHOUSE_PROTOCOL` | `http` (dev) / `https` (prod com proxy reverso)         |
+| `CLICKHOUSE_HOST`     | `template-clickhouse` (Docker) / `olap.mesf.app` (prod) |
+| `CLICKHOUSE_PORT`     | `8123` (HTTP API) / `443` (HTTPS via proxy)             |
+| `CLICKHOUSE_DATABASE` | `default`                                               |
+| `CLICKHOUSE_USERNAME` | `default`                                               |
+| `CLICKHOUSE_PASSWORD` | Vazio por padrão                                        |
+
+**⚠️ Configuração de DNS/Proxy:** Para usar `olap.mesf.app` em produção, configure o proxy reverso (Nginx/Cloudflare) para apontar para a **porta 8123** (HTTP API), **NÃO 9000** (Native TCP). Veja [CLICKHOUSE.md](CLICKHOUSE.md) para detalhes completos.
 
 **Migrations automáticas:** As tabelas `request_history` e `error_log` são criadas automaticamente via `php artisan clickhouse:migrate` (executado pelo `script/migration.sh`). Para adicionar novas tabelas, crie arquivos `.sql` em `database/clickhouse/`.
 
@@ -395,6 +405,75 @@ stripe listen --forward-to localhost:8000/api/webhook/stripe
 # Em outro terminal, disparar eventos de teste
 stripe trigger payment_intent.succeeded
 stripe trigger customer.subscription.updated
+```
+
+---
+
+## CI/CD e Monitoramento
+
+### Workflows GitHub Actions
+
+| Workflow         | Quando roda             | Bloqueia deploy? | Descrição                                                        |
+| ---------------- | ----------------------- | ---------------- | ---------------------------------------------------------------- |
+| **CI Laravel**   | Push/PR na `master`     | ✅ Sim           | Testes unitários, feature e análise estática (PHPStan)           |
+| **Health Check** | A cada 6 horas / Manual | ❌ Não           | Testa conectividade com PostgreSQL, Redis, RabbitMQ e ClickHouse |
+
+### Health Check não-bloqueante
+
+O workflow de Health Check testa as conexões com os bancos de dados mas **nunca bloqueia o deploy**:
+
+```yaml
+# .github/workflows/health-check.yml
+continue-on-error: true # Nunca falha o workflow
+```
+
+**Quando roda:**
+
+- 🕐 Automaticamente a cada 6 horas
+- 🚀 Após deploy bem-sucedido
+- 🔧 Manualmente via GitHub Actions
+
+**O que testa:**
+
+- PostgreSQL → conexão PDO
+- Redis → comando PING
+- RabbitMQ → estabelecimento de conexão AMQP
+- ClickHouse → endpoint `/ping`
+
+**Execução manual:**
+
+```bash
+# Via GitHub Actions UI
+Actions → Health Check → Run workflow
+
+# Ou via gh CLI
+gh workflow run health-check.yml
+```
+
+**Resultados:**
+
+- ✅ Todos os serviços saudáveis → log verde
+- ⚠️ Um ou mais serviços com falha → log de aviso (não bloqueia)
+
+### Rotas de health check
+
+Você também pode testar manualmente via HTTP:
+
+```bash
+# API status
+curl http://localhost/api/health/api
+
+# PostgreSQL
+curl http://localhost/api/health/database
+
+# Redis
+curl http://localhost/api/health/redis
+
+# RabbitMQ
+curl http://localhost/api/health/queue
+
+# Cache (Redis)
+curl http://localhost/api/health/cache
 ```
 
 ---

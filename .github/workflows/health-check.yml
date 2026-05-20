@@ -1,0 +1,232 @@
+name: Health Check - Database Connections
+
+on:
+  # Executa a cada 6 horas
+  schedule:
+    - cron: "0 */6 * * *"
+
+  # Permite execução manual
+  workflow_dispatch:
+
+  # Executa após deploy bem-sucedido (opcional)
+  workflow_run:
+    workflows: ["CI Laravel"]
+    types:
+      - completed
+    branches:
+      - master
+
+permissions:
+  contents: read
+
+jobs:
+  health-check:
+    name: Check Database & Services Connectivity
+    runs-on: ubuntu-latest
+    # Nunca bloqueia o workflow - sempre passa
+    continue-on-error: true
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: secret
+          POSTGRES_DB: laravel_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      rabbitmq:
+        image: rabbitmq:3-alpine
+        env:
+          RABBITMQ_DEFAULT_USER: admin
+          RABBITMQ_DEFAULT_PASS: secret
+        ports:
+          - 5672:5672
+        options: >-
+          --health-cmd "rabbitmq-diagnostics ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      clickhouse:
+        image: clickhouse/clickhouse-server:latest
+        ports:
+          - 8123:8123
+        options: >-
+          --health-cmd "wget --spider -q http://localhost:8123/ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Repository checkout
+        uses: actions/checkout@v4
+
+      - name: PHP Setup
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          extensions: mbstring, pdo, pdo_pgsql, redis, bcmath
+          coverage: none
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
+        env:
+          COMPOSER_NO_AUDIT: "1"
+
+      - name: Configure environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+          # Configurar conexões de teste
+          sed -i 's/DB_HOST=.*/DB_HOST=127.0.0.1/' .env
+          sed -i 's/DB_PORT=.*/DB_PORT=5432/' .env
+          sed -i 's/DB_DATABASE=.*/DB_DATABASE=laravel_test/' .env
+          sed -i 's/DB_USERNAME=.*/DB_USERNAME=postgres/' .env
+          sed -i 's/DB_PASSWORD=.*/DB_PASSWORD=secret/' .env
+
+          sed -i 's/REDIS_HOST=.*/REDIS_HOST=127.0.0.1/' .env
+          sed -i 's/REDIS_PORT=.*/REDIS_PORT=6379/' .env
+
+          sed -i 's/RABBITMQ_HOST=.*/RABBITMQ_HOST=localhost/' .env
+          sed -i 's/RABBITMQ_PORT=.*/RABBITMQ_PORT=5672/' .env
+          sed -i 's/RABBITMQ_USER=.*/RABBITMQ_USER=admin/' .env
+          sed -i 's/RABBITMQ_PASSWORD=.*/RABBITMQ_PASSWORD=secret/' .env
+
+          sed -i 's/CLICKHOUSE_HOST=.*/CLICKHOUSE_HOST=127.0.0.1/' .env
+          sed -i 's/CLICKHOUSE_PORT=.*/CLICKHOUSE_PORT=8123/' .env
+
+      - name: Test PostgreSQL Connection
+        id: test-postgres
+        continue-on-error: true
+        run: |
+          echo "Testing PostgreSQL connection..."
+          php artisan tinker --execute="
+            try {
+              \$pdo = DB::connection('pgsql')->getPdo();
+              echo 'PostgreSQL: Connected successfully';
+              exit(0);
+            } catch (Exception \$e) {
+              echo 'PostgreSQL: Connection failed - ' . \$e->getMessage();
+              exit(1);
+            }
+          "
+
+      - name: Test Redis Connection
+        id: test-redis
+        continue-on-error: true
+        run: |
+          echo "Testing Redis connection..."
+          php artisan tinker --execute="
+            try {
+              \$ping = Redis::ping();
+              echo 'Redis: Connected successfully - Ping: ' . \$ping;
+              exit(0);
+            } catch (Exception \$e) {
+              echo 'Redis: Connection failed - ' . \$e->getMessage();
+              exit(1);
+            }
+          "
+
+      - name: Test RabbitMQ Connection
+        id: test-rabbitmq
+        continue-on-error: true
+        run: |
+          echo "Testing RabbitMQ connection..."
+          php artisan tinker --execute="
+            try {
+              \$connection = new \PhpAmqpLib\Connection\AMQPStreamConnection(
+                'localhost', 5672, 'admin', 'secret'
+              );
+              \$connection->close();
+              echo 'RabbitMQ: Connected successfully';
+              exit(0);
+            } catch (Exception \$e) {
+              echo 'RabbitMQ: Connection failed - ' . \$e->getMessage();
+              exit(1);
+            }
+          "
+
+      - name: Test ClickHouse Connection
+        id: test-clickhouse
+        continue-on-error: true
+        run: |
+          echo "Testing ClickHouse connection..."
+          php artisan tinker --execute="
+            try {
+              \$response = Http::get('http://127.0.0.1:8123/ping');
+              if (\$response->successful()) {
+                echo 'ClickHouse: Connected successfully - Response: ' . \$response->body();
+                exit(0);
+              } else {
+                echo 'ClickHouse: Connection failed - Status: ' . \$response->status();
+                exit(1);
+              }
+            } catch (Exception \$e) {
+              echo 'ClickHouse: Connection failed - ' . \$e->getMessage();
+              exit(1);
+            }
+          "
+
+      - name: Health Check Summary
+        if: always()
+        run: |
+          echo "=== Health Check Results ==="
+          echo ""
+          echo "PostgreSQL: ${{ steps.test-postgres.outcome }}"
+          echo "Redis: ${{ steps.test-redis.outcome }}"
+          echo "RabbitMQ: ${{ steps.test-rabbitmq.outcome }}"
+          echo "ClickHouse: ${{ steps.test-clickhouse.outcome }}"
+          echo ""
+
+          # Contar falhas
+          failures=0
+          [ "${{ steps.test-postgres.outcome }}" = "failure" ] && ((failures++))
+          [ "${{ steps.test-redis.outcome }}" = "failure" ] && ((failures++))
+          [ "${{ steps.test-rabbitmq.outcome }}" = "failure" ] && ((failures++))
+          [ "${{ steps.test-clickhouse.outcome }}" = "failure" ] && ((failures++))
+
+          if [ $failures -eq 0 ]; then
+            echo "✅ All services are healthy!"
+          else
+            echo "⚠️  $failures service(s) failed health check"
+            echo "This is informational only and does not block deployments."
+          fi
+
+      # Opcional: enviar notificação em caso de falha
+      # - name: Notify on Failure
+      #   if: |
+      #     steps.test-postgres.outcome == 'failure' ||
+      #     steps.test-redis.outcome == 'failure' ||
+      #     steps.test-rabbitmq.outcome == 'failure' ||
+      #     steps.test-clickhouse.outcome == 'failure'
+      #   uses: 8398a7/action-slack@v3
+      #   with:
+      #     status: custom
+      #     custom_payload: |
+      #       {
+      #         text: "⚠️ Health Check Failed",
+      #         attachments: [{
+      #           color: 'warning',
+      #           text: `PostgreSQL: ${{ steps.test-postgres.outcome }}\nRedis: ${{ steps.test-redis.outcome }}\nRabbitMQ: ${{ steps.test-rabbitmq.outcome }}\nClickHouse: ${{ steps.test-clickhouse.outcome }}`
+      #         }]
+      #       }
+      #   env:
+      #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
