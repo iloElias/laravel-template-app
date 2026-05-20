@@ -159,6 +159,8 @@ Filas utilizadas:
 | `CLICKHOUSE_USERNAME` | `default`                                            |
 | `CLICKHOUSE_PASSWORD` | Vazio por padrão                                     |
 
+**Migrations automáticas:** As tabelas `request_history` e `error_log` são criadas automaticamente via `php artisan clickhouse:migrate` (executado pelo `script/migration.sh`). Para adicionar novas tabelas, crie arquivos `.sql` em `database/clickhouse/`.
+
 ### Object Storage (RustFS)
 
 | Variável                      | Descrição                                                                |
@@ -307,7 +309,7 @@ Em produção, remova `RUSTFS_UNSAFE_BYPASS_DISK_CHECK=true` do `docker-compose.
 
 ```bash
 script/queue.sh      # Inicia workers
-script/migration.sh  # Executa migrations via pgsql_direct
+script/migration.sh  # Executa migrations (PostgreSQL via pgsql_direct + ClickHouse)
 script/schedule.sh   # Inicia o scheduler
 script/serve.sh      # Inicia PHP dev server + Reverb
 script/cache.sh      # Limpa caches
