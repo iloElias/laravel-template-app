@@ -61,6 +61,15 @@ class User extends DynamicQuery
         'number_two_factor_auth',
         'number_verified',
         'number_verified_at',
+        // Stripe
+        'stripe_customer_id',
+        'stripe_account_id',
+        'stripe_charges_enabled',
+        'stripe_onboarding_complete',
+        'billing_model',
+        'platform_fee_percent',
+        'stripe_subscription_id',
+        'subscription_status',
     ];
 
     protected $casts = [
@@ -70,6 +79,10 @@ class User extends DynamicQuery
         'number_two_factor_auth' => 'boolean',
         'number_verified' => 'boolean',
         'number_verified_at' => 'datetime',
+        // Stripe
+        'stripe_charges_enabled' => 'boolean',
+        'stripe_onboarding_complete' => 'boolean',
+        'platform_fee_percent' => 'float',
     ];
 
     protected $hidden = [

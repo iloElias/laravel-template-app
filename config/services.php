@@ -44,12 +44,22 @@ return [
         'enabled' => env('SMS_SERVICE_ENABLED', false),
     ],
 
-    'mercadopago' => [
-        'redirect_uri' => env('MERCADOPAGO_REDIRECT_URI'),
-        'client_id' => env('MERCADOPAGO_CLIENT_ID'),
-        'client_secret' => env('MERCADOPAGO_CLIENT_SECRET'),
-        'public_key' => env('MERCADOPAGO_PUBLIC_KEY'),
-        'access_token' => env('MERCADOPAGO_ACCESS_TOKEN'),
+    'stripe' => [
+        // Chave pública (usada no frontend para inicializar o Stripe.js)
+        'key' => env('STRIPE_KEY'),
+        // Chave privada (nunca exposta ao frontend)
+        'secret' => env('STRIPE_SECRET'),
+        // Segredo do webhook da conta principal (plataforma)
+        'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
+        // Segredo do webhook das contas Connect (hosts)
+        'connect_webhook_secret' => env('STRIPE_CONNECT_WEBHOOK_SECRET'),
+        // IDs dos preços de assinatura (criados no Stripe Dashboard)
+        'plan_basic_price_id' => env('STRIPE_PLAN_BASIC_PRICE_ID'),
+        'plan_premium_price_id' => env('STRIPE_PLAN_PREMIUM_PRICE_ID'),
+        // Taxa padrão por booking no modelo de porcentagem (%)
+        'default_platform_fee_percent' => env('STRIPE_DEFAULT_PLATFORM_FEE_PERCENT', 10),
+        // Taxa por booking quando o host tem assinatura ativa (pode ser 0)
+        'subscription_booking_fee_percent' => env('STRIPE_SUBSCRIPTION_BOOKING_FEE_PERCENT', 0),
     ],
 
     'google' => [

@@ -4,8 +4,16 @@ use App\Http\Controllers\AssetController;
 use App\Http\Controllers\DebugController;
 use App\Http\Controllers\DeviceAgentController;
 use App\Http\Controllers\HealthCheckController;
+use App\Http\Controllers\Payment\WebhookController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
+
+// ─── Stripe webhooks ──────────────────────────────────────────────────────────
+// SEM autenticação, fingerprint ou throttle — verificados via assinatura HMAC
+Route::prefix('/webhook')->name('webhook.')->group(function () {
+    Route::post('/stripe', [WebhookController::class, 'handlePlatform'])->name('stripe.platform');
+    Route::post('/stripe/connect', [WebhookController::class, 'handleConnect'])->name('stripe.connect');
+});
 
 Route::middleware(['response.error', 'lang'])->group(function () {
     // Health check routes
