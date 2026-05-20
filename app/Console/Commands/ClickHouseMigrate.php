@@ -22,7 +22,7 @@ class ClickHouseMigrate extends Command
 
         $baseUrl = "{$protocol}://{$host}:{$port}";
 
-        $this->info('Running ClickHouse migrations...');
+        $this->info('Running ClickHouse migrations');
 
         // Encontrar todos os arquivos SQL no diretório clickhouse
         $migrationPath = database_path('clickhouse');
