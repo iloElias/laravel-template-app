@@ -5,27 +5,30 @@ use App\Http\Controllers\DebugController;
 use App\Http\Controllers\DeviceAgentController;
 use App\Http\Controllers\HealthCheckController;
 use App\Http\Controllers\Payment\WebhookController;
+use App\Http\Controllers\Pdf\MarkdownExportController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
-// ─── Stripe webhooks ──────────────────────────────────────────────────────────
-// SEM autenticação, fingerprint ou throttle — verificados via assinatura HMAC
 Route::prefix('/webhook')->name('webhook.')->group(function () {
     Route::post('/stripe', [WebhookController::class, 'handlePlatform'])->name('stripe.platform');
     Route::post('/stripe/connect', [WebhookController::class, 'handleConnect'])->name('stripe.connect');
 });
 
 Route::middleware(['response.error', 'lang'])->group(function () {
-    // Health check routes
     Route::prefix('/health')->name('health.')->group(function () {
+        Route::get('/status', [HealthCheckController::class, 'status'])->name('status');
+        Route::get('/ready', [HealthCheckController::class, 'ready'])->name('ready');
+        Route::get('/live', [HealthCheckController::class, 'live'])->name('live');
         Route::get('/api', [HealthCheckController::class, 'api'])->name('api');
         Route::get('/database', [HealthCheckController::class, 'database'])->name('database');
         Route::get('/cache', [HealthCheckController::class, 'cache'])->name('cache');
         Route::get('/queue', [HealthCheckController::class, 'queue'])->name('queue');
         Route::get('/redis', [HealthCheckController::class, 'redis'])->name('redis');
+        Route::get('/clickhouse', [HealthCheckController::class, 'clickhouse'])->name('clickhouse');
+        Route::get('/s3', [HealthCheckController::class, 's3'])->name('s3');
+        Route::get('/smtp', [HealthCheckController::class, 'smtp'])->name('smtp');
     });
 
-    // Debug routes (development environment only)
     Route::middleware(['dev.env'])->prefix('/debug')->name('debug.')->group(function () {
         Route::get('/', [DebugController::class, 'showEnvironment'])->name('show');
         Route::prefix('/env')->name('env.')->group(function () {
@@ -42,7 +45,6 @@ Route::middleware(['response.error', 'lang'])->group(function () {
         include __DIR__ . '/testing/email.php';
     });
 
-    // Authentication routes
     Route::prefix('/auth')->name('auth.')->group(function () {
         Route::prefix('/fingerprint')->name('fingerprint.')->group(function () {
             Route::get('/', [DeviceAgentController::class, 'makeFingerprint'])->name('create');
@@ -63,7 +65,6 @@ Route::middleware(['response.error', 'lang'])->group(function () {
         });
     });
 
-    // User routes
     Route::middleware(['db.safe', 'fingerprint'])->prefix('/user')->name('user.')->group(function () {
         Route::get('/', [UserController::class, 'index'])->name('index');
         Route::get('/exists', [UserController::class, 'exists'])->name('exists');
@@ -80,7 +81,6 @@ Route::middleware(['response.error', 'lang'])->group(function () {
         });
     });
 
-    // Upload/Attachment routes
     Route::middleware(['db.safe', 'fingerprint'])->prefix('/uploads')->name('uploads.')->group(function () {
         Route::prefix('/attachments')->name('attachments.')->group(function () {
             Route::get('/{uuid}', [AssetController::class, 'show'])->name('show');
@@ -88,6 +88,25 @@ Route::middleware(['response.error', 'lang'])->group(function () {
             Route::middleware(['auth'])->group(function () {
                 Route::get('/', [AssetController::class, 'recent'])->name('index');
                 Route::post('/', [AssetController::class, 'store'])->name('store');
+            });
+        });
+    });
+
+    Route::middleware(['db.safe', 'fingerprint'])->prefix('/pdf')->name('pdf.')->group(function () {
+        Route::prefix('/markdown')->name('markdown.')->group(function () {
+            Route::post('/convert', [MarkdownExportController::class, 'convert'])
+                ->name('convert')
+                ->middleware('throttle:20,1');
+
+            Route::get('/{uuid}', [MarkdownExportController::class, 'download'])->name('download');
+            Route::get('/{uuid}/stream', [MarkdownExportController::class, 'stream'])->name('stream');
+            Route::get('/{uuid}/url', [MarkdownExportController::class, 'temporaryUrl'])->name('url');
+
+            Route::middleware(['auth'])->group(function () {
+                Route::get('/project/{projectId}/versions', [MarkdownExportController::class, 'versions'])
+                    ->name('versions');
+                Route::delete('/{uuid}', [MarkdownExportController::class, 'destroy'])
+                    ->name('destroy');
             });
         });
     });
