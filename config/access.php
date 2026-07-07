@@ -2,6 +2,8 @@
 
 $trustedProxies = env('TRUSTED_PROXY_CIDRS');
 
+$internalTrustedProxies = env('INTERNAL_TRUSTED_PROXY_CIDRS');
+
 $defaultCloudflareCidrs = [
     '173.245.48.0/20',
     '103.21.244.0/22',
@@ -29,8 +31,24 @@ $defaultCloudflareCidrs = [
     '::1/128',
 ];
 
+$defaultInternalProxyCidrs = [
+    '10.0.0.0/8',
+    '172.16.0.0/12',
+    '192.168.0.0/16',
+    'fc00::/7',
+];
+
+$resolvedCloudflareProxies = $trustedProxies
+    ? array_values(array_filter(array_map('trim', explode(',', $trustedProxies))))
+    : $defaultCloudflareCidrs;
+
+$resolvedInternalProxies = $internalTrustedProxies
+    ? array_values(array_filter(array_map('trim', explode(',', $internalTrustedProxies))))
+    : $defaultInternalProxyCidrs;
+
 return [
-    'trusted_proxies' => $trustedProxies
-        ? array_values(array_filter(array_map('trim', explode(',', $trustedProxies))))
-        : $defaultCloudflareCidrs,
+    'trusted_proxies' => array_values(array_unique(array_merge(
+        $resolvedCloudflareProxies,
+        $resolvedInternalProxies,
+    ))),
 ];
