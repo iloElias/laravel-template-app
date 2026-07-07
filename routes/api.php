@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AccessController;
 use App\Http\Controllers\AssetController;
 use App\Http\Controllers\DebugController;
 use App\Http\Controllers\DeviceAgentController;
@@ -15,6 +16,8 @@ Route::prefix('/webhook')->name('webhook.')->group(function () {
 });
 
 Route::middleware(['response.error', 'lang'])->group(function () {
+    Route::get('/access', [AccessController::class, 'handleThatAccess'])->name('email');
+
     Route::prefix('/health')->name('health.')->group(function () {
         Route::get('/status', [HealthCheckController::class, 'status'])->name('status');
         Route::get('/ready', [HealthCheckController::class, 'ready'])->name('ready');
