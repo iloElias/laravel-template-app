@@ -15,6 +15,9 @@ return new class () extends Migration {
             $table->uuid('request_id')->unique();
             $table->string('source_id', 64)->index();
             $table->string('ip', 45)->nullable()->index();
+            $table->string('client_ip', 45)->nullable()->index();
+            $table->string('proxy_ip', 45)->nullable()->index();
+            $table->string('cf_ray', 64)->nullable()->index();
             $table->string('forwarded_ip', 45)->nullable();
             $table->string('cf_connecting_ip', 45)->nullable();
             $table->string('method', 10);

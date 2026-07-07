@@ -15,11 +15,13 @@ class AccessRequestTrackingService
 
     public function store(Request $request): AccessRequestLog
     {
-        $ip = Tracker::ip();
-        $geo = $this->ipGeolocationService->locate($ip);
+        $clientIp = Tracker::ip();
+        $proxyIp = Tracker::proxyIp();
+        $cfRay = Tracker::cfRay();
+        $geo = $this->ipGeolocationService->locate($clientIp);
 
         $sourceId = hash('sha256', implode('|', [
-            (string) $ip,
+            (string) $clientIp,
             (string) $request->userAgent(),
             (string) $request->header('accept-language'),
             (string) $request->getHost(),
@@ -28,7 +30,10 @@ class AccessRequestTrackingService
         return AccessRequestLog::query()->create([
             'request_id' => (string) Str::uuid(),
             'source_id' => $sourceId,
-            'ip' => $ip,
+            'ip' => $clientIp,
+            'client_ip' => $clientIp,
+            'proxy_ip' => $proxyIp,
+            'cf_ray' => $cfRay,
             'forwarded_ip' => $request->header('x-forwarded-for'),
             'cf_connecting_ip' => $request->header('cf-connecting-ip'),
             'method' => $request->method(),

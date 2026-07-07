@@ -200,6 +200,39 @@ Filas utilizadas:
 | ------------ | ----------------------------------------------------------------------- |
 | `SENTRY_DSN` | [sentry.io](https://sentry.io) → Projeto → Settings → Client Keys (DSN) |
 
+### IP real do cliente (Cloudflare)
+
+Para registrar o IP real do cliente atras da Cloudflare, mantenha as regras abaixo:
+
+1. Manter dominio com proxy da Cloudflare habilitado.
+2. Restringir acesso ao origin para aceitar trafego apenas dos ranges de IP da Cloudflare (firewall/security group).
+3. Nao expor origin publicamente. Se exposto, headers como `CF-Connecting-IP` podem ser forjados por cliente direto.
+
+Configuracao:
+
+- `TRUSTED_PROXY_CIDRS` (opcional): lista separada por virgula com CIDRs confiaveis.
+- Sem `TRUSTED_PROXY_CIDRS`, o sistema usa os ranges oficiais da Cloudflare por padrao (definidos em `config/access.php`).
+
+Regra de resolucao de IP implementada:
+
+1. Se `REMOTE_ADDR` for proxy confiavel, usar `CF-Connecting-IP` valido.
+2. Se ausente, usar primeiro IP valido em `X-Forwarded-For`.
+3. Fallback: `REMOTE_ADDR`.
+4. Valores invalidos sao descartados, com normalizacao IPv4/IPv6.
+
+Campos de log em `system.access_request_log`:
+
+- `client_ip`: IP real resolvido pelas regras acima.
+- `proxy_ip`: IP que conectou no origin.
+- `cf_ray`: identificador da Cloudflare para correlacao.
+- `method`, `path`, `user_agent`, `created_at`.
+
+Teste rapido:
+
+1. Acesse pelo site (rede residencial/4G) e valide `client_ip` com seu IP publico real.
+2. Envie request direta ao origin com `CF-Connecting-IP` falso; backend deve ignorar e usar `REMOTE_ADDR`.
+3. Confirme `proxy_ip` com IP de borda Cloudflare e correlacione incidente por `cf_ray` + `client_ip`.
+
 ### Stripe
 
 | Variável                                  | Descrição                                     | Onde obter                                                              |
