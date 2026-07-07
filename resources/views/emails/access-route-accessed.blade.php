@@ -34,7 +34,13 @@
             @if($mapOpenUrl)
                 <a href="{{ $mapOpenUrl }}" target="_blank" style="display: block; margin-bottom: 10px; color: #1a73e8; text-decoration: none;">Abrir mapa completo</a>
             @endif
-            <img src="{{ $mapImageUrl }}" alt="Mapa aproximado do IP" style="max-width: 100%; border: 1px solid #DDDDDD; border-radius: 8px;">
+            @if($mapOpenUrl)
+                <a href="{{ $mapOpenUrl }}" target="_blank">
+                    <img src="{{ $mapImageUrl }}" alt="Mapa aproximado do IP" style="max-width: 100%; border: 1px solid #DDDDDD; border-radius: 8px;">
+                </a>
+            @else
+                <img src="{{ $mapImageUrl }}" alt="Mapa aproximado do IP" style="max-width: 100%; border: 1px solid #DDDDDD; border-radius: 8px;">
+            @endif
         @else
             <p style="margin: 0; color: #666666; font-size: 14px;">Nao foi possivel determinar coordenadas publicas para gerar o mapa.</p>
         @endif
